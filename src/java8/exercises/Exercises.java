@@ -9,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,7 +25,7 @@ public class Exercises {
     @Test
     @Disabled
     public void printAllWords() {
-        /* TODO */
+        wordList.stream().forEach(System.out::println);
         // no assertions
     }
     
@@ -32,7 +34,9 @@ public class Exercises {
     
     @Test @Disabled
     public void upperCaseWords() {
-        List<String> output = null; /* TODO */
+        List<String> output = wordList.stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
         
         assertEquals(
             Arrays.asList(
@@ -47,7 +51,9 @@ public class Exercises {
     
     @Test @Disabled
     public void findEvenLengthWords() {
-        List<String> output = null; /* TODO */
+        List<String> output = wordList.stream()
+                .filter(x -> x.length() % 2 == 0)
+                .collect(Collectors.toList());
         
         assertEquals(
             Arrays.asList(
@@ -63,7 +69,7 @@ public class Exercises {
 
     @Test @Disabled
     public void countLinesInFile() throws IOException {
-        long count = 0L; /* TODO */
+        long count = reader.lines().count();
         
         assertEquals(14, count);
     }
@@ -72,7 +78,10 @@ public class Exercises {
     
     @Test @Disabled
     public void joinLineRange() throws IOException {
-        String output = null; /* TODO */
+        String output = reader.lines()
+                .skip(2)
+                .limit(2)
+                .collect(Collectors.joining());
         
         assertEquals(
             "But as the riper should by time decease," +
@@ -84,9 +93,12 @@ public class Exercises {
     
     @Test @Disabled
     public void lengthOfLongestLine() throws IOException {
-        int longest = 0; /* TODO */
+        int longest = reader.lines()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
         
-        assertEquals(longest, 53);
+        assertEquals(53, longest);
     }
     
 // Exercise 7: Collect all the words from the text file into a list.
@@ -96,7 +108,11 @@ public class Exercises {
     
     @Test @Disabled
     public void listOfAllWords() throws IOException {
-        List<String> output = null; /* TODO */
+        List<String> output = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .filter(x -> !x.isEmpty())
+                .collect(Collectors.toList());
         
         assertEquals(
             Arrays.asList(
@@ -122,7 +138,13 @@ public class Exercises {
     
     @Test @Disabled
     public void sortedLowerCase() throws IOException {
-        List<String> output = null; /* TODO */
+        List<String> output = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .filter(x -> !x.isEmpty())
+                .map(String::toLowerCase)
+                .sorted()
+                .collect(Collectors.toList());
         
         assertEquals(
             Arrays.asList(
@@ -150,7 +172,14 @@ public class Exercises {
 
     @Test @Disabled
     public void sortedLowerCaseDistinctByLengthThenAlphabetically() throws IOException {
-        List<String> output = null; /* TODO */
+        List<String> output = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .filter(x -> !x.isEmpty())
+                .map(String::toLowerCase)
+                .distinct()
+                .sorted(Comparator.comparingInt(String::length).thenComparing(x->x))
+                .collect(Collectors.toList());
         
         assertEquals(
             Arrays.asList(
@@ -177,7 +206,11 @@ public class Exercises {
     
     @Test @Disabled
     public void mapLengthToWordList() throws IOException {
-        Map<Integer, List<String>> map = null; /* TODO */
+        Map<Integer, List<String>> map = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+//                .filter(x -> !x.isEmpty())
+                .collect(Collectors.groupingBy(String::length));
         
         assertEquals(6, map.get(7).size());
         assertEquals(Arrays.asList("increase", "ornament"), map.get(8));
@@ -194,7 +227,10 @@ public class Exercises {
     
     @Test @Disabled
     public void wordFrequencies() throws IOException {
-        Map<String, Long> map = null; /* TODO */
+        Map<String, Long> map = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.groupingBy(x->x, Collectors.counting()));
 
         assertEquals(2L, (long)map.get("tender"));
         assertEquals(6L, (long)map.get("the"));
@@ -216,7 +252,11 @@ public class Exercises {
 
     @Test @Disabled
     public void nestedMaps() throws IOException {
-        Map<String, Map<Integer, List<String>>> map = null; /* TODO */
+        Map<String, Map<Integer, List<String>>> map = reader.lines()
+                .map(x -> x.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .filter(x -> !x.isEmpty())
+                .collect(Collectors.groupingBy(x -> x.substring(0,1), Collectors.groupingBy(String::length)));
 
         assertEquals("[From, Feed]", map.get("F").get(4).toString());
         assertEquals("[by, be, by]", map.get("b").get(2).toString());
